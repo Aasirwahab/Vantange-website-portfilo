@@ -1,0 +1,44 @@
+.mobile-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 10;
+    display: none;
+}
+
+.mobile-logo h1 {
+    font-size: 3rem;
+    line-height: 1;
+    font-weight: 500;
+    color: #1a1818;
+}
+
+.mobile-cta button {
+    border: 1px solid #1a1818;
+    color: #1a1818;
+}
+
+@media (max-width: 1000px) {
+    .mobile-header {
+        display: flex;
+    }
+
+    .hero .hero-content {
+        top: 45%;
+    }
+
+    .hero .hero-header h1 {
+        font-size: 3.5rem;
+        line-height: 0.9;
+        text-align: center;
+    }
+
+    .hero .hero-content .btn {
+        display: none;
+    }
+}

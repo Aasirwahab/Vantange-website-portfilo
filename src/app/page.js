@@ -1,5 +1,6 @@
 "use client";
 import "./index.css";
+import "./mobile-styles.css";
 import "./preloader.css";
 import { useRef, useState, useEffect } from "react";
 
@@ -231,6 +232,7 @@ export default function Home() {
         <div className="hero-bg">
           <img src="/home/hero.jpg" alt="Brutalist Architecture" />
         </div>
+
         <div className="hero-gradient"></div>
         <div className="container">
           <div className="hero-content">
