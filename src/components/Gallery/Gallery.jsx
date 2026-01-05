@@ -220,6 +220,29 @@ export default function Gallery() {
     });
   };
 
+  const galleryImages = [
+    "/spotlight/spotlight-img-1.jpg",
+    "/spotlight/spotlight-img-2.jpg",
+    "/spotlight/spotlight-img-3.jpg",
+    "/spotlight/spotlight-img-4.jpg",
+    "/spotlight/spotlight-img-5.jpg",
+    "/spotlight/spotlight-img-6.jpg",
+    "/spotlight/spotlight-img-7.jpg",
+    "/spotlight/spotlight-img-8.jpg",
+    "/spotlight/spotlight-img-9.jpg",
+    "/spotlight/spotlight-img-10.jpg",
+    "/featured-projects/featured-work-1.jpg",
+    "/featured-projects/featured-work-2.jpg",
+    "/featured-projects/featured-work-3.jpg",
+    "/featured-projects/featured-work-4.jpg",
+    "/spaces/space-1.jpg",
+    "/spaces/space-2.jpg",
+    "/spaces/space-3.jpg",
+    "/spaces/space-4.jpg",
+    "/spaces/space-5.jpg",
+    "/spaces/space-6.jpg",
+  ];
+
   const updateVisibleItems = () => {
     const state = stateRef.current;
     const canvas = canvasRef.current;
@@ -237,35 +260,35 @@ export default function Gallery() {
         ? -100
         : -200
       : isMobile
-      ? 100
-      : 200;
+        ? 100
+        : 200;
     const directionBufferY = movingDown
       ? isMobile
         ? -100
         : -200
       : isMobile
-      ? 100
-      : 200;
+        ? 100
+        : 200;
 
     const startCol = Math.floor(
       (-state.currentX - viewWidth / 2 + (movingRight ? directionBufferX : 0)) /
-        (itemWidth + itemGap)
+      (itemWidth + itemGap)
     );
     const endCol = Math.ceil(
       (-state.currentX +
         viewWidth * (isMobile ? 1.0 : 1.2) +
         (!movingRight ? directionBufferX : 0)) /
-        (itemWidth + itemGap)
+      (itemWidth + itemGap)
     );
     const startRow = Math.floor(
       (-state.currentY - viewHeight / 2 + (movingDown ? directionBufferY : 0)) /
-        (itemHeight + itemGap)
+      (itemHeight + itemGap)
     );
     const endRow = Math.ceil(
       (-state.currentY +
         viewHeight * (isMobile ? 1.0 : 1.2) +
         (!movingDown ? directionBufferY : 0)) /
-        (itemHeight + itemGap)
+      (itemHeight + itemGap)
     );
 
     const currentItems = new Set();
@@ -294,10 +317,12 @@ export default function Gallery() {
           gsap.set(item, { scale: 0 });
         }
 
-        const itemNum = (Math.abs(row * columns + col) % itemCount) + 1;
+        const imgIndex =
+          (Math.abs(row * columns + col) % galleryImages.length);
         const img = document.createElement("img");
-        img.src = `/archive/archive-${itemNum}.jpg`;
-        img.alt = `Image ${itemNum}`;
+        img.src = galleryImages[imgIndex];
+        img.alt = `Image ${imgIndex + 1}`;
+        item.dataset.index = imgIndex;
         item.appendChild(img);
 
         item.addEventListener("click", (e) => {
@@ -348,10 +373,8 @@ export default function Gallery() {
     state.canDrag = false;
     container.style.cursor = "auto";
 
-    const imgSrc = item.querySelector("img").src;
-    const imgMatch = imgSrc.match(/\/img(\d+)\.jpg/);
-    const imgNum = imgMatch ? parseInt(imgMatch[1]) : 1;
-    const titleIndex = (imgNum - 1) % items.length;
+    const imgIndex = parseInt(item.dataset.index);
+    const titleIndex = imgIndex % items.length;
 
     setAndAnimateTitle(items[titleIndex]);
     item.style.visibility = "hidden";
@@ -485,7 +508,7 @@ export default function Gallery() {
       const now = Date.now();
       const distMoved = Math.sqrt(
         Math.pow(state.currentX - state.lastX, 2) +
-          Math.pow(state.currentY - state.lastY, 2)
+        Math.pow(state.currentY - state.lastY, 2)
       );
 
       const isMobile = window.innerWidth <= 1000;

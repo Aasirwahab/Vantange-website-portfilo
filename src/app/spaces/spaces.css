@@ -34,6 +34,14 @@
   color: var(--base-300);
   padding: 0.5rem 0;
   cursor: pointer;
+  transition: opacity 0.3s ease;
+  opacity: 0.5;
+}
+
+.spaces .prop-filters .filter:hover,
+.spaces .prop-filters .filter.active {
+  color: var(--base-100);
+  opacity: 1;
 }
 
 .spaces .prop-filters .filter.default {

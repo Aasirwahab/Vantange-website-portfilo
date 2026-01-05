@@ -1,7 +1,7 @@
 "use client";
 import "./spaces.css";
 import { spacesData } from "./spaces.js";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -17,6 +17,12 @@ const page = () => {
   const spacesRef = useRef(null);
   const scrollTriggerInstances = useRef([]);
   const { navigateWithTransition } = useViewTransition();
+  const [currentCategory, setCurrentCategory] = useState("All");
+
+  const filteredSpaces = spacesData.filter((space) => {
+    if (currentCategory === "All") return true;
+    return space.categories.includes(currentCategory);
+  });
 
   const cleanupScrollTriggers = () => {
     scrollTriggerInstances.current.forEach((instance) => {
@@ -30,52 +36,57 @@ const page = () => {
 
     if (!spacesRef.current) return;
 
-    const spaces = spacesRef.current.querySelectorAll(".space");
-    if (spaces.length === 0) return;
+    // Small timeout to allow DOM to update
+    const ctx = gsap.context(() => {
+      const spaces = spacesRef.current.querySelectorAll(".space");
+      if (spaces.length === 0) return;
 
-    spaces.forEach((space, index) => {
-      gsap.set(space, {
-        opacity: 0,
-        scale: 0.75,
-        y: 150,
+      spaces.forEach((space, index) => {
+        gsap.set(space, {
+          opacity: 0,
+          scale: 0.75,
+          y: 150,
+        });
+
+        if (index === 0) {
+          gsap.to(space, {
+            duration: 0.75,
+            y: 0,
+            scale: 1,
+            opacity: 1,
+            ease: "power3.out",
+            delay: 0.2,
+          });
+        } else {
+          const trigger = ScrollTrigger.create({
+            trigger: space,
+            start: "top 100%",
+            onEnter: () => {
+              gsap.to(space, {
+                duration: 0.75,
+                y: 0,
+                scale: 1,
+                opacity: 1,
+                ease: "power3.out",
+              });
+            },
+          });
+
+          scrollTriggerInstances.current.push(trigger);
+        }
       });
 
-      if (index === 0) {
-        gsap.to(space, {
-          duration: 0.75,
-          y: 0,
-          scale: 1,
-          opacity: 1,
-          ease: "power3.out",
-          delay: 1.4,
-        });
-      } else {
-        const trigger = ScrollTrigger.create({
-          trigger: space,
-          start: "top 100%",
-          onEnter: () => {
-            gsap.to(space, {
-              duration: 0.75,
-              y: 0,
-              scale: 1,
-              opacity: 1,
-              ease: "power3.out",
-            });
-          },
-        });
+      ScrollTrigger.refresh();
+    }, spacesRef);
 
-        scrollTriggerInstances.current.push(trigger);
-      }
-    });
-
-    ScrollTrigger.refresh();
+    return () => ctx.revert();
   };
 
   useEffect(() => {
     setupAnimations();
 
     const handleResize = () => {
-      setupAnimations();
+      ScrollTrigger.refresh();
     };
 
     window.addEventListener("resize", handleResize);
@@ -84,7 +95,12 @@ const page = () => {
       window.removeEventListener("resize", handleResize);
       cleanupScrollTriggers();
     };
-  }, []);
+  }, [filteredSpaces]);
+
+  const handleFilter = (category) => {
+    if (category === currentCategory) return;
+    setCurrentCategory(category);
+  };
 
   return (
     <>
@@ -98,22 +114,37 @@ const page = () => {
                 <h1>Timeless Spaces</h1>
               </Copy>
               <div className="prop-filters">
-                <div className="filter default">
+                <div
+                  className={`filter ${currentCategory === "All" ? "active" : ""}`}
+                  onClick={() => handleFilter("All")}
+                >
                   <Copy delay={1}>
                     <p className="lg">All</p>
                   </Copy>
                 </div>
-                <div className="filter">
+                <div
+                  className={`filter ${currentCategory === "Residential" ? "active" : ""
+                    }`}
+                  onClick={() => handleFilter("Residential")}
+                >
                   <Copy delay={1.1}>
                     <p className="lg">Residential</p>
                   </Copy>
                 </div>
-                <div className="filter">
+                <div
+                  className={`filter ${currentCategory === "Commercial" ? "active" : ""
+                    }`}
+                  onClick={() => handleFilter("Commercial")}
+                >
                   <Copy delay={1.2}>
                     <p className="lg">Commercial</p>
                   </Copy>
                 </div>
-                <div className="filter">
+                <div
+                  className={`filter ${currentCategory === "Hospitality" ? "active" : ""
+                    }`}
+                  onClick={() => handleFilter("Hospitality")}
+                >
                   <Copy delay={1.3}>
                     <p className="lg">Hospitality</p>
                   </Copy>
@@ -124,7 +155,7 @@ const page = () => {
         </section>
         <section className="spaces-list">
           <div className="container" ref={spacesRef}>
-            {spacesData.map((space, index) => (
+            {filteredSpaces.map((space, index) => (
               <a
                 key={space.id}
                 href={space.route}
