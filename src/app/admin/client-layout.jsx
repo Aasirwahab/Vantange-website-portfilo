@@ -10,12 +10,16 @@ import {
     FiImage,
     FiSettings,
     FiMenu,
-    FiX
+    FiX,
+    FiEdit,
+    FiType
 } from "react-icons/fi";
 import "./admin.css";
 
 const navItems = [
     { name: "Dashboard", href: "/admin", icon: FiHome },
+    { name: "Pages", href: "/admin/pages", icon: FiEdit },
+    { name: "Typography", href: "/admin/typography", icon: FiType },
     { name: "Spaces", href: "/admin/spaces", icon: FiGrid },
     { name: "Testimonials", href: "/admin/testimonials", icon: FiMessageSquare },
     { name: "Media", href: "/admin/media", icon: FiImage },

@@ -101,6 +101,8 @@ model PageContent {
   section   String   // e.g., "hero", "facts"
   content   Json     // Flexible JSON structure
   updatedAt DateTime @updatedAt
+
+  @@unique([page, section])
 }
 
 model GalleryImage {

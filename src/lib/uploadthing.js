@@ -17,19 +17,19 @@ export const ourFileRouter = {
             const { isAdmin, user, error } = await verifyAdmin();
 
             if (!isAdmin) {
-                throw new Error(error || "Unauthorized - Admin access required for file uploads");
+                throw new Error("Unauthorized - Admin login required");
             }
 
-            // Return user info to be available in onUploadComplete
+            // Return metadata
             return {
-                userId: user.email,
-                adminId: user.id
+                userId: user?.email || user?.id || 'admin',
             };
         })
         .onUploadComplete(async ({ metadata, file }) => {
-            console.log("Upload complete by admin:", metadata.userId);
+            console.log("Upload complete by:", metadata.userId);
             console.log("File URL:", file.url);
 
+            // UploadThing automatically optimizes images to WebP
             return { url: file.url };
         }),
 };

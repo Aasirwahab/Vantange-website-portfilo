@@ -23,10 +23,25 @@ gsap.registerPlugin(ScrollTrigger, CustomEase);
 CustomEase.create("hop", "0.9, 0, 0.1, 1");
 
 export default function Home() {
+  const [cmsContent, setCmsContent] = useState(null);
   const tagsRef = useRef(null);
   const [showPreloader, setShowPreloader] = useState(isInitialLoad);
   const [loaderAnimating, setLoaderAnimating] = useState(false);
   const lenis = useLenis();
+
+  // Fetch CMS content
+  useEffect(() => {
+    async function fetchCMS() {
+      try {
+        const res = await fetch('/api/pages/home');
+        const data = await res.json();
+        setCmsContent(data);
+      } catch (error) {
+        console.error('Failed to load CMS content:', error);
+      }
+    }
+    fetchCMS();
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -230,7 +245,7 @@ export default function Home() {
       <Nav />
       <section className="hero">
         <div className="hero-bg">
-          <img src="/home/hero.jpg" alt="Brutalist Architecture" />
+          <img src={cmsContent?.hero?.bgImage || "/home/hero.jpg"} alt="Brutalist Architecture" />
         </div>
 
         <div className="hero-gradient"></div>
@@ -238,20 +253,19 @@ export default function Home() {
           <div className="hero-content">
             <div className="hero-header">
               <Copy animateOnScroll={false} delay={showPreloader ? 10 : 0.85}>
-                <h1>ARCHITECTURE THAT COMMANDS THE HORIZON</h1>
+                <h1>{cmsContent?.hero?.title || "ARCHITECTURE THAT COMMANDS THE HORIZON"}</h1>
               </Copy>
             </div>
             <div className="hero-tagline">
               <Copy animateOnScroll={false} delay={showPreloader ? 10.15 : 1}>
                 <p>
-                  VANTAGE defines the skyline with unyielding form and absolute precision.
-                  We build for the bold.
+                  {cmsContent?.hero?.tagline || "VANTAGE defines the skyline with unyielding form and absolute precision. We build for the bold."}
                 </p>
               </Copy>
             </div>
             <AnimatedButton
-              label="INQUIRE"
-              route="/studio"
+              label={cmsContent?.hero?.buttonText || "INQUIRE"}
+              route={cmsContent?.hero?.buttonRoute || "/studio"}
               animateOnScroll={false}
               delay={showPreloader ? 10.3 : 1.15}
             />
@@ -259,58 +273,26 @@ export default function Home() {
         </div>
         <div className="hero-stats">
           <div className="container">
-            <div className="stat">
-              <div className="stat-count">
-                <Copy delay={0.1}>
-                  <h2>45</h2>
-                </Copy>
+            {(cmsContent?.stats?.stats || [
+              { count: '45', label: 'MONUMENTAL PROJECTS' },
+              { count: '12', label: 'URBAN DEVELOPMENTS' },
+              { count: '08', label: 'GLOBAL AWARDS' },
+              { count: '100%', label: 'STRUCTURAL INTEGRITY' }
+            ]).map((stat, index) => (
+              <div className="stat" key={index}>
+                <div className="stat-count">
+                  <Copy delay={0.1 + index * 0.05}>
+                    <h2>{stat.count}</h2>
+                  </Copy>
+                </div>
+                <div className="stat-divider"></div>
+                <div className="stat-info">
+                  <Copy delay={0.15 + index * 0.05}>
+                    <p>{stat.label}</p>
+                  </Copy>
+                </div>
               </div>
-              <div className="stat-divider"></div>
-              <div className="stat-info">
-                <Copy delay={0.15}>
-                  <p>MONUMENTAL PROJECTS</p>
-                </Copy>
-              </div>
-            </div>
-            <div className="stat">
-              <div className="stat-count">
-                <Copy delay={0.2}>
-                  <h2>12</h2>
-                </Copy>
-              </div>
-              <div className="stat-divider"></div>
-              <div className="stat-info">
-                <Copy delay={0.25}>
-                  <p>URBAN DEVELOPMENTS</p>
-                </Copy>
-              </div>
-            </div>
-            <div className="stat">
-              <div className="stat-count">
-                <Copy delay={0.3}>
-                  <h2>08</h2>
-                </Copy>
-              </div>
-              <div className="stat-divider"></div>
-              <div className="stat-info">
-                <Copy delay={0.35}>
-                  <p>GLOBAL AWARDS</p>
-                </Copy>
-              </div>
-            </div>
-            <div className="stat">
-              <div className="stat-count">
-                <Copy delay={0.4}>
-                  <h2>100%</h2>
-                </Copy>
-              </div>
-              <div className="stat-divider"></div>
-              <div className="stat-info">
-                <Copy delay={0.45}>
-                  <p>STRUCTURAL INTEGRITY</p>
-                </Copy>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
