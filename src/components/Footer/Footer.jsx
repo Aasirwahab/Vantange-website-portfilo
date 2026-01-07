@@ -1,7 +1,7 @@
 "use client";
 import "./Footer.css";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -20,12 +20,20 @@ gsap.registerPlugin(ScrollTrigger);
 const Footer = () => {
   const { navigateWithTransition } = useViewTransition();
   const socialIconsRef = useRef(null);
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => setSettings(data))
+      .catch((err) => console.error("Failed to load footer settings", err));
+  }, []);
 
   useGSAP(
     () => {
       if (!socialIconsRef.current) return;
 
-      const icons = socialIconsRef.current.querySelectorAll(".icon");
+      const icons = socialIconsRef.current.querySelectorAll(".social-link");
       gsap.set(icons, { opacity: 0, x: -40 });
 
       ScrollTrigger.create({
@@ -41,7 +49,7 @@ const Footer = () => {
         }),
       });
     },
-    { scope: socialIconsRef }
+    { scope: socialIconsRef, dependencies: [settings] }
   );
 
   return (
@@ -52,11 +60,11 @@ const Footer = () => {
             <div className="footer-meta-block">
               <div className="footer-meta-logo">
                 <Copy delay={0.1}>
-                  <h3 className="lg">VANTAGE</h3>
+                  <h3 className="lg">{settings?.site_name || "VANTAGE"}</h3>
                 </Copy>
               </div>
               <Copy delay={0.2}>
-                <h2>UNYIELDING FORM. ABSOLUTE PRECISION.</h2>
+                <h2>{settings?.site_tagline || "UNYIELDING FORM. ABSOLUTE PRECISION."}</h2>
               </Copy>
             </div>
           </div>
@@ -124,18 +132,26 @@ const Footer = () => {
         <div className="container footer-socials">
           <div className="footer-meta-col">
             <div className="footer-socials-wrapper" ref={socialIconsRef}>
-              <div className="icon">
-                <RiLinkedinBoxLine />
-              </div>
-              <div className="icon">
-                <RiInstagramLine />
-              </div>
-              <div className="icon">
-                <RiDribbbleLine />
-              </div>
-              <div className="icon">
-                <RiYoutubeLine />
-              </div>
+              {settings?.social_linkedin && (
+                <a href={settings.social_linkedin} target="_blank" rel="noopener noreferrer" className="icon social-link">
+                  <RiLinkedinBoxLine />
+                </a>
+              )}
+              {settings?.social_instagram && (
+                <a href={settings.social_instagram} target="_blank" rel="noopener noreferrer" className="icon social-link">
+                  <RiInstagramLine />
+                </a>
+              )}
+              {settings?.social_dribbble && (
+                <a href={settings.social_dribbble} target="_blank" rel="noopener noreferrer" className="icon social-link">
+                  <RiDribbbleLine />
+                </a>
+              )}
+              {settings?.social_youtube && (
+                <a href={settings.social_youtube} target="_blank" rel="noopener noreferrer" className="icon social-link">
+                  <RiYoutubeLine />
+                </a>
+              )}
             </div>
           </div>
           <div className="footer-meta-col">
@@ -158,7 +174,7 @@ const Footer = () => {
               DEVELOPER BY — <span>WAHAB AASIR</span>
             </p>
             <p>DATA PRIVACY ACTIVE.</p>
-            <p>ALL RIGHTS RESERVED &copy; 2025</p>
+            <p>ALL RIGHTS RESERVED &copy; {new Date().getFullYear()}</p>
           </div>
         </div>
       </div>

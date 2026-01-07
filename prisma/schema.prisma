@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
+}
+
+// ========================================
+// SPACES / PROJECTS
+// ========================================
+model Space {
+  id          Int      @id @default(autoincrement())
+  name        String
+  location    String
+  date        String
+  image       String
+  categories  String[] // e.g., ["Commercial", "Office"]
+  clientName  String
+  clientImage String
+  route       String   @default("/sample-space")
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ========================================
+// CLIENT TESTIMONIALS / REVIEWS
+// ========================================
+model Testimonial {
+  id        Int      @id @default(autoincrement())
+  name      String
+  title     String
+  image     String
+  avatar    String
+  review    String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ========================================
+// SITE SETTINGS
+// ========================================
+model Setting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String   @db.Text
+  type      String   @default("text") // text, image, boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ========================================
+// MEDIA LIBRARY
+// ========================================
+model Media {
+  id        Int      @id @default(autoincrement())
+  name      String
+  url       String
+  type      String   // image, video, etc.
+  size      Int?
+  createdAt DateTime @default(now())
+}
+
+// ========================================
+// HERO SECTION CONTENT
+// ========================================
+model HeroContent {
+  id          Int      @id @default(autoincrement())
+  title       String
+  tagline     String
+  buttonText  String
+  buttonRoute String
+  bgImage     String
+  stats       Json?    // Array of {count, label}
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ========================================
+// GALLERY IMAGES
+// ========================================
+model Admin {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ========================================
+// PAGE CONTENT (JSON STORE)
+// ========================================
+model PageContent {
+  id        Int      @id @default(autoincrement())
+  page      String   // e.g., "home", "studio"
+  section   String   // e.g., "hero", "facts"
+  content   Json     // Flexible JSON structure
+  updatedAt DateTime @updatedAt
+}
+
+model GalleryImage {
+  id        Int      @id @default(autoincrement())
+  image     String
+  caption   String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
