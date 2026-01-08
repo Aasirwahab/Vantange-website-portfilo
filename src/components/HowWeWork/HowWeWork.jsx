@@ -41,90 +41,73 @@ const HowWeWork = () => {
 
   useGSAP(
     () => {
-      if (!stepsRef.current) return;
+      if (!isMounted || isMobile) return;
 
-      const steps = stepsRef.current.querySelectorAll(".how-we-work-step");
-      gsap.set(steps, { opacity: 0, x: -40 });
+      const container = containerRef.current;
+      const header = headerRef.current;
+      const cards = cardsRef.current;
+      const steps = stepsRef.current;
+
+      if (!container || !header || !cards || !steps) return;
+
+      // Initialize Steps Animation
+      const stepElements = steps.querySelectorAll(".how-we-work-step");
+      gsap.set(stepElements, { opacity: 0, x: -40 });
 
       ScrollTrigger.create({
-        trigger: stepsRef.current,
-        start: "top 75%",
+        trigger: steps,
+        start: "top 80%",
         once: true,
-        animation: gsap.to(steps, {
-          opacity: 1,
-          x: 0,
-          duration: 0.3,
-          stagger: -0.1,
-          ease: "none",
-        }),
-      });
-    },
-    { scope: stepsRef }
-  );
-
-  useEffect(() => {
-    // Wait for component to be fully mounted before initializing GSAP
-    if (!isMounted) return;
-
-    const container = containerRef.current;
-    const header = headerRef.current;
-    const cards = cardsRef.current;
-
-    if (!container || !header || !cards) return;
-
-    // Use requestAnimationFrame to ensure DOM is ready
-    const initScrollTrigger = () => {
-      if (!isMobile) {
-        const mainTrigger = ScrollTrigger.create({
-          trigger: container,
-          start: "top top",
-          endTrigger: cards,
-          end: "bottom bottom",
-          pin: header,
-          pinSpacing: false,
-        });
-        scrollTriggersRef.current.push(mainTrigger);
-
-        const cardElements = cards.querySelectorAll(".how-we-work-card");
-
-        cardElements.forEach((card, index) => {
-          const cardTrigger = ScrollTrigger.create({
-            trigger: card,
-            start: "top center",
-            end: "bottom center",
-            onEnter: () => setActiveStep(index),
-            onEnterBack: () => setActiveStep(index),
-            onLeave: () => {
-              if (index < cardElements.length - 1) {
-                setActiveStep(index + 1);
-              }
-            },
-            onLeaveBack: () => {
-              if (index > 0) {
-                setActiveStep(index - 1);
-              }
-            },
+        onEnter: () => {
+          gsap.to(stepElements, {
+            opacity: 1,
+            x: 0,
+            duration: 0.5,
+            stagger: 0.1,
+            ease: "power2.out",
+            overwrite: true,
           });
-          scrollTriggersRef.current.push(cardTrigger);
+        }
+      });
+
+      // Main Container Pinning
+      ScrollTrigger.create({
+        trigger: container,
+        start: "top top",
+        endTrigger: cards,
+        end: "bottom bottom",
+        pin: header,
+        pinSpacing: false,
+      });
+
+      // Card Active State Triggers
+      const cardElements = cards.querySelectorAll(".how-we-work-card");
+      cardElements.forEach((card, index) => {
+        ScrollTrigger.create({
+          trigger: card,
+          start: "top center",
+          end: "bottom center",
+          onEnter: () => setActiveStep(index),
+          onEnterBack: () => setActiveStep(index),
         });
+      });
 
-        // Refresh ScrollTrigger calculations after a short delay
-        setTimeout(() => {
-          ScrollTrigger.refresh();
-        }, 100);
-      }
-    };
+      // Force refresh to handle layout shifts from images
+      const handleRefresh = () => ScrollTrigger.refresh();
 
-    // Delay initialization to ensure fonts and styles are loaded
-    requestAnimationFrame(() => {
-      requestAnimationFrame(initScrollTrigger);
-    });
+      // Refresh after a short delay to allow for execution
+      setTimeout(handleRefresh, 100);
+      setTimeout(handleRefresh, 500);
 
-    return () => {
-      scrollTriggersRef.current.forEach((trigger) => trigger.kill());
-      scrollTriggersRef.current = [];
-    };
-  }, [isMobile, isMounted]);
+      // Refresh on window load for safe measure (if images load late)
+      window.addEventListener("load", handleRefresh);
+
+      return () => {
+        window.removeEventListener("load", handleRefresh);
+      };
+    },
+    { scope: containerRef, dependencies: [isMounted, isMobile] }
+  );
 
   return (
     <div className="how-we-work" ref={containerRef}>
