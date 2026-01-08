@@ -18,13 +18,18 @@ const HowWeWork = () => {
   const stepsRef = useRef(null);
   const [activeStep, setActiveStep] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const scrollTriggersRef = useRef([]);
 
   const checkMobile = () => {
-    setIsMobile(window.innerWidth <= 1000);
+    if (typeof window !== 'undefined') {
+      setIsMobile(window.innerWidth <= 1000);
+    }
   };
 
+  // Handle mounting state for SSR
   useEffect(() => {
+    setIsMounted(true);
     checkMobile();
 
     window.addEventListener("resize", checkMobile);
@@ -58,52 +63,68 @@ const HowWeWork = () => {
   );
 
   useEffect(() => {
+    // Wait for component to be fully mounted before initializing GSAP
+    if (!isMounted) return;
+
     const container = containerRef.current;
     const header = headerRef.current;
     const cards = cardsRef.current;
 
     if (!container || !header || !cards) return;
 
-    if (!isMobile) {
-      const mainTrigger = ScrollTrigger.create({
-        trigger: container,
-        start: "top top",
-        endTrigger: cards,
-        end: "bottom bottom",
-        pin: header,
-        pinSpacing: false,
-      });
-      scrollTriggersRef.current.push(mainTrigger);
-
-      const cardElements = cards.querySelectorAll(".how-we-work-card");
-
-      cardElements.forEach((card, index) => {
-        const cardTrigger = ScrollTrigger.create({
-          trigger: card,
-          start: "top center",
-          end: "bottom center",
-          onEnter: () => setActiveStep(index),
-          onEnterBack: () => setActiveStep(index),
-          onLeave: () => {
-            if (index < cardElements.length - 1) {
-              setActiveStep(index + 1);
-            }
-          },
-          onLeaveBack: () => {
-            if (index > 0) {
-              setActiveStep(index - 1);
-            }
-          },
+    // Use requestAnimationFrame to ensure DOM is ready
+    const initScrollTrigger = () => {
+      if (!isMobile) {
+        const mainTrigger = ScrollTrigger.create({
+          trigger: container,
+          start: "top top",
+          endTrigger: cards,
+          end: "bottom bottom",
+          pin: header,
+          pinSpacing: false,
         });
-        scrollTriggersRef.current.push(cardTrigger);
-      });
-    }
+        scrollTriggersRef.current.push(mainTrigger);
+
+        const cardElements = cards.querySelectorAll(".how-we-work-card");
+
+        cardElements.forEach((card, index) => {
+          const cardTrigger = ScrollTrigger.create({
+            trigger: card,
+            start: "top center",
+            end: "bottom center",
+            onEnter: () => setActiveStep(index),
+            onEnterBack: () => setActiveStep(index),
+            onLeave: () => {
+              if (index < cardElements.length - 1) {
+                setActiveStep(index + 1);
+              }
+            },
+            onLeaveBack: () => {
+              if (index > 0) {
+                setActiveStep(index - 1);
+              }
+            },
+          });
+          scrollTriggersRef.current.push(cardTrigger);
+        });
+
+        // Refresh ScrollTrigger calculations after a short delay
+        setTimeout(() => {
+          ScrollTrigger.refresh();
+        }, 100);
+      }
+    };
+
+    // Delay initialization to ensure fonts and styles are loaded
+    requestAnimationFrame(() => {
+      requestAnimationFrame(initScrollTrigger);
+    });
 
     return () => {
       scrollTriggersRef.current.forEach((trigger) => trigger.kill());
       scrollTriggersRef.current = [];
     };
-  }, [isMobile]);
+  }, [isMobile, isMounted]);
 
   return (
     <div className="how-we-work" ref={containerRef}>
@@ -123,33 +144,29 @@ const HowWeWork = () => {
             </Copy>
             <div className="how-we-work-steps" ref={stepsRef}>
               <div
-                className={`how-we-work-step ${
-                  activeStep === 0 ? "active" : ""
-                }`}
+                className={`how-we-work-step ${activeStep === 0 ? "active" : ""
+                  }`}
               >
                 <p className="how-we-work-step-label">Step</p>
                 <p className="how-we-work-step-index">1</p>
               </div>
               <div
-                className={`how-we-work-step ${
-                  activeStep === 1 ? "active" : ""
-                }`}
+                className={`how-we-work-step ${activeStep === 1 ? "active" : ""
+                  }`}
               >
                 <p className="how-we-work-step-label">Step</p>
                 <p className="how-we-work-step-index">2</p>
               </div>
               <div
-                className={`how-we-work-step ${
-                  activeStep === 2 ? "active" : ""
-                }`}
+                className={`how-we-work-step ${activeStep === 2 ? "active" : ""
+                  }`}
               >
                 <p className="how-we-work-step-label">Step</p>
                 <p className="how-we-work-step-index">3</p>
               </div>
               <div
-                className={`how-we-work-step ${
-                  activeStep === 3 ? "active" : ""
-                }`}
+                className={`how-we-work-step ${activeStep === 3 ? "active" : ""
+                  }`}
               >
                 <p className="how-we-work-step-label">Step</p>
                 <p className="how-we-work-step-index">4</p>
